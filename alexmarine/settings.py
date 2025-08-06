@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-%-4dcf+azxrwc_+duke$b_s!7msvop5+2hoxznepbjrk97l+$2
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['192.168.1.158', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['192.168.1.158', 'localhost', '127.0.0.1','alexmarine.fly.dev']
 
 
 # Application definition
@@ -78,7 +78,9 @@ WSGI_APPLICATION = 'alexmarine.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),        
+        'PORT': '5432',
+
     }
 }
 
