@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ملخص شحنات</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+            direction: rtl;
+        }
+        h2 {
+            text-align: center;
+            color: #ff0101;
+            font-size: 40px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-top: 20px;
+        }
+
+        a {
+            display: inline-block;
+            margin: 10px;
+            padding: 10px 15px;
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+
+        a:hover {
+            background-color: #45a049;
+        }
+
+        table {
+            width: 90%;
+            margin: 20px auto;
+            border-collapse: collapse;
+            background-color: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        table th, table td {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+
+        table th {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        table tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        table tr:hover {
+            background-color: #ddd;
+        }
+
+        p {
+            text-align: center;
+            color: #888;
+            font-size: 16px;
+        }
+
+    </style>
+</head>
+<body>
+    <div style="text-align: center;">
+    <a href="{% url 'shipment_list' %}">قائمة الشحنات</a>
+    <a href="{% url 'company_list' %}">قائمة الشركات</a>
+    <a href="{% url 'add_shipment' %}">إضافة شحنة جديدة</a>
+    <a href="{% url 'add_company' %}">إضافة شركة جديدة</a>
+    <a href="{% url 'upload_excel' %}">اضافه ملف شحنات</a>
+    </div>
+    <h1>شحنات جارى العمل عليها حاليا </h1>
+    <hr>
+    {% if shipments %}
+        <table id="dataTable">
+            <thead>
+                <tr>
+                    <th>اسم الشركة</th>
+                    <th>رقم الإقرار</th>
+                    <th>اسم التوكيل</th>
+                    <th>رقم الشهاده</th>
+                    <th>تاريخ الوصول</th>
+                    <th>فتح الشهادة</th>
+                    <th>تاريخ الانتهاء</th>
+                    <th>الوزن</th>
+                    <th>عدد الطرود</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for shipment in shipments %}
+                    {% if shipment.Delivery_data and not shipment.exchange_data %}
+                        <tr>
+                            <td>{{ shipment.company.name }}</td>
+                            <td>{{ shipment.ducmentsno }}</td>
+                            <td>{{ shipment.agency }}</td>
+                            <td>{{ shipment.NoCR }}</td>
+                            <td>{{ shipment.expected_arrival_date }}</td>
+                            <td>{{ shipment.NoCE_data }}</td>
+                            <td>{{ shipment.End_customs_data }}</td>
+                            <td>{{ shipment.weight }}</td>
+                            <td>{{ shipment.packages_count }}</td>
+                        </tr>
+                    {% endif %}
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>لا توجد شحنات لعرضها</p>
+    {% endif %}
+</body>
+</html>

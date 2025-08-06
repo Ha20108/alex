@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>الحركات المالية</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Cairo', sans-serif;
+        }
+        .card {
+            border-radius: 1rem;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            margin-bottom: 1.5rem;
+        }
+        .table th, .table td {
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body class="container py-4">
+    <h2 class="mb-4 text-center">💰 الحركات المالية اليومية</h2>
+
+    <div class="card p-4">
+        <form method="get" class="row g-3 mb-3">
+            <div class="col-md-4">
+                <label>من:</label>
+                <input type="date" name="from" class="form-control" value="{{ from_date }}">
+            </div>
+            <div class="col-md-4">
+                <label>إلى:</label>
+                <input type="date" name="to" class="form-control" value="{{ to_date }}">
+            </div>
+            <div class="col-md-4 align-self-end d-flex gap-2">
+                <button type="submit" class="btn btn-primary w-50">🔍 فلترة</button>
+                <a href="{% url 'export_transactions_excel' %}?from={{ from_date }}&to={{ to_date }}" class="btn btn-success w-50">📥 تصدير Excel</a>
+            </div>
+        </form>
+
+        <form method="post">
+            {% csrf_token %}
+            <div class="row g-3 align-items-end">
+                <div class="col-md-2">
+                    {{ form.date.label_tag }} {{ form.date }}
+                </div>
+                <div class="col-md-3">
+                    {{ form.description.label_tag }} {{ form.description }}
+                </div>
+                <div class="col-md-2">
+                    {{ form.type.label_tag }} {{ form.type }}
+                </div>
+                <div class="col-md-2">
+                    {{ form.currency.label_tag }} {{ form.currency }}
+                </div>
+                <div class="col-md-2">
+                    {{ form.amount.label_tag }} {{ form.amount }}
+                </div>
+                <div class="col-md-1 d-grid">
+                    <button type="submit" class="btn btn-dark">➕ إضافة</button>
+                </div>
+            </div>
+        </form>
+        
+    {% for code, data in data_by_currency.items %}
+        <div class="card p-3">
+            <h5 class="mb-3">💱 العملة: {{ code }}</h5>
+            <table class="table table-bordered table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>📅 التاريخ</th>
+                        <th>📝 البيان</th>
+                        <th>🔁 النوع</th>
+                        <th>💵 المبلغ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for tx in data.transactions %}
+                        <tr>
+                            <td>{{ tx.date }}</td>
+                            <td>{{ tx.description }}</td>
+                            <td>{{ tx.get_type_display }}</td>
+                            <td>{{ tx.amount }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="4" class="text-center">لا توجد حركات</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <div class="row text-center">
+                <div class="col">📥 إجمالي الوارد: <strong>{{ data.in }}</strong></div>
+                <div class="col">📤 إجمالي الصادر: <strong>{{ data.out }}</strong></div>
+                <div class="col">💼 الرصيد: <strong>{{ data.balance }}</strong></div>
+            </div>
+        </div>
+    {% endfor %}
+</body>
+</html>

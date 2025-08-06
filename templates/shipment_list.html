@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>قائمه الشحنات</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+            direction: rtl;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-top: 20px;
+        }
+
+        label {
+            font-size: 18px;
+            margin-right: 10px;
+        }
+
+        select {
+            padding: 8px;
+            font-size: 16px;
+            margin: 10px 0;
+            width: 200px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        table {
+            width: 90%;
+            margin: 20px auto;
+            border-collapse: collapse;
+            background-color: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        table tr:hover {
+            background-color: #ddd;
+        }
+
+        a {
+            display: inline-block;
+            margin: 20px 0;
+            padding: 10px 15px;
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+
+        a:hover {
+            background-color: #45a049;
+        }
+
+        .details {
+            display: none;
+            padding: 10px;
+            background-color: #f1f1f1;
+            margin-top: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            direction: rtl;
+        }
+
+        .show-details {
+            cursor: pointer;
+            color: #4CAF50;
+            font-weight: bold;
+        }
+
+        .editable-cell {
+            cursor: pointer;
+        }
+
+        .save-button {
+            display: none;
+            padding: 10px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .save-button.show {
+            display: inline-block;
+        }
+
+        .editable-cell {
+        white-space: pre-wrap; /* عرض الأسطر الجديدة */
+        }
+
+    </style>
+</head>
+<body>
+    <center>    
+        <a href="{% url 'home' %}">الصفحه الرئيسيه</a>
+    </center>
+
+    <h1>قائمة الشحنات</h1>
+    <br>
+    <label for="filter">اختر الشركة للفلترة:</label>
+    <select id="filter" onchange="filterTable()">
+        <option value="">اختر...</option>
+        {% for company in companies %}
+            <option value="{{ company.name }}">{{ company.name }}</option>
+        {% endfor %}
+
+    </select>
+    <!-- حقل إدخال لتصفية البيانات حسب اسم الشركة -->
+    <input type="text" id="dataFilter" placeholder="ابحث في البيانات..." onkeyup="filterTable()">
+
+    <a href="{% url 'add_shipment' %}">إضافة شحنة جديدة</a>
+
+    <button class="save-button" onclick="saveChanges()">حفظ التعديلات</button>
+
+    <table id="dataTable">
+        <thead>
+            <tr>
+                <th>اسم الشركة</th>
+                <th>رقم الاقرار</th>
+                <th>اسم التوكيل</th>
+                <th>ACID</th>
+                <th>تاريخ استلام الأوراق</th>
+                <th>تاريخ الوصول المتوقع</th>
+                <th>تاريخ الصرف</th>
+                <th>المزيد</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for shipment in shipments %}
+            <tr class="shipment-row">
+                <td>{{ shipment.company.name }}</td>
+                <td class="editable-cell" data-field="ducmentsno" data-id="{{ shipment.id }}">{{ shipment.ducmentsno }}</td>
+                <td class="editable-cell" data-field="agency" data-id="{{ shipment.id }}">{{ shipment.agency }}</td>
+                <td>{{ shipment.Acidno }}</td>
+                <td class="editable-cell" data-field="documents_received_date" data-id="{{ shipment.id }}">{{ shipment.documents_received_date }}</td>
+                <td class="editable-cell" data-field="expected_arrival_date" data-id="{{ shipment.id }}">{{ shipment.expected_arrival_date }}</td>
+                <td class="editable-cell" data-field="exchange_data" data-id="{{ shipment.id }}">{{ shipment.exchange_data }}</td>
+                <td><span class="show-details" onclick="toggleDetails(this)">عرض المزيد</span></td>
+            </tr>
+            <tr class="details">
+                <td colspan="12">
+                    <table style="width: 100%; text-align: left;">
+                        <tbody>
+                            <tr>
+                                <td><strong>اسم الشركة:</strong></td>
+                                <td>{{ shipment.company.name }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>رقم الاقرار:</strong></td>
+                                <td class="editable-cell" data-field="ducmentsno" data-id="{{ shipment.id }}">{{ shipment.ducmentsno }}</td>
+
+                            <tr>
+                                <td><strong>اسم التوكيل:</strong></td>
+                                <td class="editable-cell" data-field="agency" data-id="{{ shipment.id }}">{{ shipment.agency }}</td>
+                            <tr>
+                                <td><strong>ACID:</strong></td>
+                                <td class="editable-cell" data-field="Acidno" data-id="{{ shipment.id }}">{{ shipment.Acidno }}</td>
+                            <tr>
+                                <td><strong>رقم الشهاده:</strong></td>
+                                <td class="editable-cell" data-field="NoCR" data-id="{{ shipment.id }}">{{ shipment.NoCR }}</td>
+            
+                            <tr>
+                                <td><strong>تاريخ استلام الأوراق:</strong></td>
+                                <td class="editable-cell" data-field="documents_received_date" data-id="{{ shipment.id }}">{{ shipment.documents_received_date }}</td>
+
+                            <tr>
+                                <td><strong>تاريخ الوصول المتوقع:</strong></td>
+                                <td class="editable-cell" data-field="expected_arrival_date" data-id="{{ shipment.id }}">{{ shipment.expected_arrival_date }}</td>
+
+                            </tr>
+                            <tr>
+                                <td><strong>تاريخ التخزين:</strong></td>
+                                <td class="editable-cell" data-field="storge_data" data-id="{{ shipment.id }}">{{ shipment.storge_data }}</td>
+
+                            </tr>
+                            <tr>
+                                <td><strong>استلام الإذن:</strong></td>
+                                <td class="editable-cell" data-field="Delivery_data" data-id="{{ shipment.id }}">{{ shipment.Delivery_data }}</td>
+
+                            </tr>
+                            <tr>
+                                <td><strong>فتح الشهادة:</strong></td>
+                                <td class="editable-cell" data-field="NoCE_data" data-id="{{ shipment.id }}">{{ shipment.NoCE_data }}</td>
+
+                            </tr>
+                            <tr>
+                                <td><strong>تاريخ الانتهاء:</strong></td>
+                                <td class="editable-cell" data-field="End_customs_data" data-id="{{ shipment.id }}">{{ shipment.End_customs_data }}</td>
+
+                            </tr>
+                            <tr>
+                                <td><strong>تاريخ الصرف:</strong></td>
+                                <td class="editable-cell" data-field="exchange_data" data-id="{{ shipment.id }}">{{ shipment.exchange_data }}</td>
+
+                            <tr>
+                                <td><strong>الوزن:</strong></td>
+                                <td class="editable-cell" data-field="weight" data-id="{{ shipment.id }}">{{ shipment.weight }}</td>
+
+                            </tr>
+                            <tr>
+                                <td><strong>عدد الطرود:</strong></td>
+                                <td class="editable-cell" data-field="packages_count" data-id="{{ shipment.id }}">{{ shipment.packages_count }}</td>
+
+                            </tr>
+                            <tr>
+                                <td><strong>رقم البوليصه:</strong></td>
+                                <td class="editable-cell" data-field="bill_of_lading" data-id="{{ shipment.id }}">{{ shipment.bill_of_lading }}</td>
+
+                            </tr>
+                            <tr>
+                                <td><strong>اسم الباخره:</strong></td>
+                                <td class="editable-cell" data-field="vessel_name" data-id="{{ shipment.id }}">{{ shipment.vessel_name }}</td>
+
+                            </tr>
+                            <tr>
+                                <td><strong>ملاحظات:</strong></td>
+                                <td class="editable-cell" data-field="comment" data-id="{{ shipment.id }}">{{ shipment.comment }}</td>
+
+                            </tr>
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+
+    <script>
+        let modifiedData = [];
+
+        function filterTable() {
+            const filterValue = document.getElementById('filter').value.trim().toLowerCase();
+            const rows = document.querySelectorAll('#dataTable tbody tr.shipment-row');
+
+            rows.forEach(row => {
+                const companyName = row.cells[0].textContent.trim().toLowerCase();
+                const detailsRow = row.nextElementSibling;
+
+                if (detailsRow && detailsRow.classList.contains('details')) {
+                    detailsRow.style.display = 'none';
+                }
+
+                if (filterValue === "" || companyName.includes(filterValue)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        function toggleDetails(element) {
+            const detailsRow = element.closest('tr').nextElementSibling;
+            if (detailsRow.style.display === '' || detailsRow.style.display === 'none') {
+                detailsRow.style.display = 'table-row';
+                element.textContent = 'إخفاء المزيد';
+            } else {
+                detailsRow.style.display = 'none';
+                element.textContent = 'عرض المزيد';
+            }
+        }
+
+        // عند الضغط على أي خلية لتعديلها
+        // عند الضغط على أي خلية لتعديلها
+        document.querySelectorAll('.editable-cell').forEach(cell => {
+            cell.addEventListener('click', function() {
+                // تحقق إذا كانت الخلية تحتوي على حقل إدخال بالفعل
+                if (cell.querySelector('input')) {
+                    return; // إذا كان هناك حقل إدخال، لا تقم بإنشاء واحد جديد
+                }
+
+                const currentValue = cell.textContent.trim();
+                cell.innerHTML = `<input type="text" value="${currentValue}" />`;
+
+                const inputField = cell.querySelector('input');
+                inputField.addEventListener('blur', function() {
+                    const newValue = inputField.value;
+                    if (newValue !== currentValue) {
+                        modifiedData.push({
+                            id: cell.getAttribute('data-id'),
+                            field: cell.getAttribute('data-field'),
+                            newValue: newValue
+                        });
+                    }
+                    cell.innerHTML = newValue;
+                    document.querySelector('.save-button').classList.add('show'); // عرض زر الحفظ
+                });
+
+                inputField.focus();
+            });
+        });
+
+        // حفظ التعديلات
+        function saveChanges() {
+            fetch("{% url 'save_shipment_changes' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({ modifiedData })
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert("تم حفظ التعديلات بنجاح");
+                document.querySelector('.save-button').classList.remove('show');
+                modifiedData = []; // إعادة تعيين التعديلات
+            })
+            .catch(error => {
+                console.error('خطأ في حفظ التعديلات:', error);
+                alert("حدث خطأ أثناء حفظ التعديلات");
+            });
+        }
+
+
+
+
+
+
+        // بحث
+
+    //     function filterTable() {
+    //     var input, filter, table, tr, td, i, j, txtValue;
+    //     input = document.getElementById('dataFilter');
+    //     filter = input.value.toLowerCase();
+    //     table = document.getElementById("dataTable");
+    //     tr = table.getElementsByTagName("tr");
+
+    //     // ابدأ من الصفوف بعد الرأس
+    //     for (i = 1; i < tr.length; i++) {
+    //         tr[i].style.display = "none"; // إخفاء الصف افتراضيا
+    //         td = tr[i].getElementsByTagName("td");
+            
+    //         // تحقق من كل خلية في الصف
+    //         for (j = 0; j < td.length; j++) {
+    //             if (td[j]) {
+    //                 txtValue = td[j].textContent || td[j].innerText;
+    //                 if (txtValue.toLowerCase().indexOf(filter) > -1) {
+    //                     tr[i].style.display = ""; // عرض الصف إذا تم العثور على المطابقة
+    //                     break; // الخروج من الحلقة الداخلية عند إيجاد مطابقة
+    //                 }
+    //             }
+    //         }
+    //     }
+    // }
+</script>
+
+</body>
+</html>
